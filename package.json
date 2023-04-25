@@ -1,0 +1,39 @@
+{
+  "name": "node-mavlink-ftp",
+  "version": "0.0.1-alpha.0",
+  "author": "Matthias Hryniszak <padcom@gmail.com>",
+  "license": "LGPL",
+  "description": "MavLink ftp services",
+  "keywords": [
+    "mavlink"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/padcom/node-mavlink-ftp.git"
+  },
+  "bugs": {
+    "email": "padcom@gmail.com",
+    "url": "https://github.com/padcom/node-mavlink-ftp/issues"
+  },
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/padcom"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf dist lib/*.js param.pck*",
+    "clean:all": "npm run clean && rm -rf node_modules",
+    "build": "tsc",
+    "prepublishOnly": "npm run clean && npm install && npm run build"
+  },
+  "dependencies": {
+    "node-mavlink": "^2.0.5"
+  },
+  "devDependencies": {
+    "node-mavlink-heartbeat": "^0.0.1-alpha.1",
+    "serialport": "^10.5.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}

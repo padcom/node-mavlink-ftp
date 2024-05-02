@@ -59,7 +59,7 @@ This async function returns a list of entries containing information about files
 
 This async function removes a file. That's it - nothing more. It'll throw an error if the file wasn't there to begin with.
 
-#### `async downloadFile(filename): Buffer`
+#### `async downloadFile(filename, progress): Buffer`
 
 This async function downloads the content of the specified file into the buffer it returns.
 

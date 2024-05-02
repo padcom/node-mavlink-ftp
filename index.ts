@@ -345,15 +345,36 @@ export class MavFTP extends Transform {
     return { response }
   }
 
-  private async readFile() {
+  private async readFile(size: number, progress: (offset: number, chunkSize: number, totalSize: number, percentage: number, expectedTime: number) => void) {
     let result = Buffer.from([])
     let offset = 0
+  
+    const dt: number[] = []
+    let dt_i = 0
+    let t = performance.now()
+    if (typeof progress == 'function') {
+      progress(0, 0, size, 0, Infinity)
+    }
+    
     while (true) {
       const response = await this.send(this.packet(common.MavFtpOpcode.READFILE, 230, offset))
       if (response?.opcode === common.MavFtpOpcode.ACK) {
         result = Buffer.concat([ result, response.data ])
         offset = offset + response.data.length
+        
+        if(typeof progress == 'function') {
+          var t1 = performance.now()
+          dt[dt_i] = t1-t
+          dt_i = (dt_i+1) % 1000
+          t = t1
+          var precentage = Math.min(offset / size * 100, 100)
+          var expected_time = Math.max((size-offset)/230*(dt.reduce(function(p, c) { return p + c; }, 0) / dt.length)/1000, 0)
+          progress(offset, response.data.length, size, precentage, expected_time)
+        }
       } else if (response?.data[0] === FileTransferProtocolError.EOF) {
+        if (typeof progress == 'function') {
+          progress(size, 0, size, 100, 0)
+        }
         return result
       } else {
         throw new Error(`Unable to read contents of file: ${response?.data[0]}`)
@@ -361,11 +382,11 @@ export class MavFTP extends Transform {
     }
   }
 
-  async downloadFile(filename: string) {
-    await this.openFileRO(filename)
+  async downloadFile(filename: string, progress: (offset: number, chunkSize: number, totalSize: number, percentage: number, expectedTime: number) => void) {
+    const { size } = await this.openFileRO(filename)
     try {
       // this `await` here is necessary so that try/finally can work!
-      return await this.readFile()
+      return await this.readFile(size, progress)
     } finally {
       await this.terminateSession()
     }

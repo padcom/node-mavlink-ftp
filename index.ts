@@ -190,6 +190,18 @@ export class MavFTPDirectoryListingParser {
 }
 
 /**
+ * Type defining arguments for a progress callback
+ */
+export type ProgressCallback = (offset: number, totalSize: number) => void
+
+/**
+ * Extra options for downloadFile
+ */
+export interface DownloadFileOptions {
+  onProgress?: ProgressCallback
+}
+
+/**
  * Error codes for MavFTP when returned opcode is 129
  */
 export enum FileTransferProtocolError {
@@ -345,15 +357,22 @@ export class MavFTP extends Transform {
     return { response }
   }
 
-  private async readFile() {
+  private reportProgress(offset: number, totalSize: number, callback?: ProgressCallback) {
+    if (typeof callback === 'function') callback(offset, totalSize)
+  }
+
+  private async readFile(size: number, progressCallback?: ProgressCallback) {
     let result = Buffer.from([])
     let offset = 0
+    this.reportProgress(offset, size, progressCallback)
     while (true) {
       const response = await this.send(this.packet(common.MavFtpOpcode.READFILE, 230, offset))
       if (response?.opcode === common.MavFtpOpcode.ACK) {
         result = Buffer.concat([ result, response.data ])
         offset = offset + response.data.length
+        this.reportProgress(offset, size, progressCallback)
       } else if (response?.data[0] === FileTransferProtocolError.EOF) {
+        this.reportProgress(size, size, progressCallback)
         return result
       } else {
         throw new Error(`Unable to read contents of file: ${response?.data[0]}`)
@@ -361,11 +380,13 @@ export class MavFTP extends Transform {
     }
   }
 
-  async downloadFile(filename: string) {
-    await this.openFileRO(filename)
+  async downloadFile(filename: string, {
+    onProgress = () => {},
+  }: DownloadFileOptions = {}) {
+    const { size } = await this.openFileRO(filename)
     try {
       // this `await` here is necessary so that try/finally can work!
-      return await this.readFile()
+      return await this.readFile(size, onProgress)
     } finally {
       await this.terminateSession()
     }

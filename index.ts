@@ -338,7 +338,7 @@ export class MavFTP extends Transform {
     return result
   }
 
-  private async openFileRO(path: string = '@PARAM/param.pck?withDefaults=1') {
+  private async openFileRO(path: string = '@PARAM/param.pck?withdefaults=1') {
     const response = await this.send(this.packet(common.MavFtpOpcode.OPENFILERO, path))
     this.handleError(response)
 

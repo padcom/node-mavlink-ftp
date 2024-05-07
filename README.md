@@ -4,7 +4,7 @@ Mavlink is a great protocol. It's versatile and allows for quite complex workflo
 
 Why would you use it? Of course reading log files from the SD card is one possibility. But there is more. For example, you can download a virtual file that contains the list of currently running threads, or another that has a list of active serial ports!
 
-One very special file goes by the name of `@PARAM/param.pck?withDefaults=1`. This one is virtual and contains a tightly packed list of all currently active parameters. Downloading it and decoding is like a 1000x faster than requesting each parameter separately.
+One very special file goes by the name of `@PARAM/param.pck?withdefaults=1`. This one is virtual and contains a tightly packed list of all currently active parameters. Downloading it and decoding is like a 1000x faster than requesting each parameter separately.
 
 ## Installation
 

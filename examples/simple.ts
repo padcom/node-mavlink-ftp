@@ -26,7 +26,7 @@ import { MavFTP } from '..'
     .pipe(ftp)
     .resume()
 
-  const filename = '@PARAM/param.pck?withDefaults=1'
+  const filename = '@PARAM/param.pck?withdefaults=1'
   console.log('Opening serial port...')
 
   console.log('Waiting for heartbeat from the drone...')
